@@ -1,30 +1,57 @@
 const CONFIG = {
-  SHEET_NAME: 'Completo', // tu pestaña
+  SHEET_NAME: 'Completo',
   HEADER_ROW: 1,
 
-  // Encabezados esperados (fila 1) para los motores de búsqueda:
   HEADERS: {
-    PAIS: 'PAIS', // Col A
-    TIPO: 'Tipo', // Col B
-    PVD:  'Nombre en Portal de Venta Directa (PVD)' // Col D
+    PAIS: 'PAIS',
+    TIPO: 'Tipo',
+    PVD: 'Nombre en Portal de Venta Directa (PVD)'
   },
 
-  // Fallback por posición (0-index) si no encuentra el encabezado:
   FALLBACK_INDEX: {
-    PAIS: 0, // A
-    TIPO: 1, // B
-    PVD:  3  // D
-  }
+    PAIS: 0,
+    TIPO: 1,
+    PVD: 3
+  },
+
+  CACHE_DURATION: 300,
+  MAX_ROWS_DISPLAY: 500
 };
 
+// ========== CACHE MANAGER ==========
+const CACHE_KEYS = {
+  SHEET_DATA: 'sheetData',
+  OPTIONS: 'options'
+};
+
+function getCache(key) {
+  const cache = CacheService.getScriptCache();
+  const data = cache.get(key);
+  return data ? JSON.parse(data) : null;
+}
+
+function setCache(key, data) {
+  const cache = CacheService.getScriptCache();
+  cache.put(key, JSON.stringify(data), CONFIG.CACHE_DURATION);
+}
+
+function clearCache() {
+  const cache = CacheService.getScriptCache();
+  cache.removeAll([CACHE_KEYS.SHEET_DATA, CACHE_KEYS.OPTIONS]);
+}
+
+// ========== INTERFAZ ==========
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle('Buscador Productos')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// ---------- Lectura dinámica del Sheet ----------
+// ========== LECTURA DE DATOS ==========
 function readSheet_() {
+  const cached = getCache(CACHE_KEYS.SHEET_DATA);
+  if (cached) return cached;
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName(CONFIG.SHEET_NAME);
   if (!sh) throw new Error(`No existe la pestaña "${CONFIG.SHEET_NAME}". Revisá el nombre exacto.`);
@@ -37,19 +64,18 @@ function readSheet_() {
   const rawHeaders = values[0].map(h => String(h ?? '').trim());
   const data = values.slice(1);
 
-  // Map normalizado header -> índice
   const colIndex = {};
   rawHeaders.forEach((h, i) => {
     const k = normalize_(h);
     if (!k) return;
-    // Si hay headers duplicados, nos quedamos con el primero
     if (colIndex[k] === undefined) colIndex[k] = i;
   });
 
-  // Headers seguros (si alguno viene vacío)
   const headers = rawHeaders.map((h, i) => h || `Col${i + 1}`);
 
-  return { headers, data, colIndex };
+  const result = { headers, data, colIndex };
+  setCache(CACHE_KEYS.SHEET_DATA, result);
+  return result;
 }
 
 function normalize_(s) {
@@ -57,13 +83,13 @@ function normalize_(s) {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, ' ')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quita tildes
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 function getCol_(colIndex, headerText, fallbackIdx) {
   const key = normalize_(headerText);
   if (key && colIndex[key] !== undefined) return colIndex[key];
-  return fallbackIdx; // fallback por posición
+  return fallbackIdx;
 }
 
 function uniqSorted_(arr) {
@@ -73,57 +99,63 @@ function uniqSorted_(arr) {
   return Array.from(s).sort((a, b) => a.localeCompare(b, 'es'));
 }
 
-// ---------- Opciones para desplegables ----------
+// ========== OPCIONES - SOLO PAÍSES AL INICIO ==========
 function getOptions() {
   const { data, colIndex } = readSheet_();
 
   const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
-  const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd  = getCol_(colIndex, CONFIG.HEADERS.PVD,  CONFIG.FALLBACK_INDEX.PVD);
 
   const paises = uniqSorted_(data.map(r => r[iPais]));
-  const tipos  = uniqSorted_(data.map(r => r[iTipo]));
-  const pvds   = uniqSorted_(data.map(r => r[iPvd]));
 
-  return { paises, tipos, pvds };
+  return { paises };
 }
 
+// ========== OPCIONES FILTRADAS - TIPOS Y PVD EN CASCADA ==========
 function getOptionsFiltered(filters) {
   const { data, colIndex } = readSheet_();
 
   const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
   const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd  = getCol_(colIndex, CONFIG.HEADERS.PVD,  CONFIG.FALLBACK_INDEX.PVD);
+  const iPvd = getCol_(colIndex, CONFIG.HEADERS.PVD, CONFIG.FALLBACK_INDEX.PVD);
 
   let filtered = data;
 
-  if (filters?.pais) filtered = filtered.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
+  // Filtrar por país
+  if (filters?.pais) {
+    filtered = filtered.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
+  }
+
   const tipos = uniqSorted_(filtered.map(r => r[iTipo]));
 
-  if (filters?.tipo) filtered = filtered.filter(r => String(r[iTipo]).trim() === String(filters.tipo).trim());
+  // Filtrar por tipo
+  if (filters?.tipo) {
+    filtered = filtered.filter(r => String(r[iTipo]).trim() === String(filters.tipo).trim());
+  }
+
   const pvds = uniqSorted_(filtered.map(r => r[iPvd]));
 
-  // Países completos
-  const paises = uniqSorted_(data.map(r => r[iPais]));
-
-  return { paises, tipos, pvds };
+  return { tipos, pvds };
 }
 
-// ---------- Búsqueda ----------
+// ========== BÚSQUEDA ==========
 function search(filters) {
   const { headers, data, colIndex } = readSheet_();
 
   const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
   const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd  = getCol_(colIndex, CONFIG.HEADERS.PVD,  CONFIG.FALLBACK_INDEX.PVD);
+  const iPvd = getCol_(colIndex, CONFIG.HEADERS.PVD, CONFIG.FALLBACK_INDEX.PVD);
 
   let out = data;
 
   if (filters?.pais) out = out.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
   if (filters?.tipo) out = out.filter(r => String(r[iTipo]).trim() === String(filters.tipo).trim());
-  if (filters?.pvd)  out = out.filter(r => String(r[iPvd]).trim()  === String(filters.pvd).trim());
+  if (filters?.pvd) out = out.filter(r => String(r[iPvd]).trim() === String(filters.pvd).trim());
 
-  // Convertimos filas a objetos usando headers actuales (dinámicos)
+  // Limitar resultados para mejor rendimiento
+  if (out.length > CONFIG.MAX_ROWS_DISPLAY) {
+    out = out.slice(0, CONFIG.MAX_ROWS_DISPLAY);
+  }
+
   const rows = out.map(r => {
     const obj = {};
     headers.forEach((h, i) => obj[h] = r[i]);
@@ -133,12 +165,12 @@ function search(filters) {
   return { headers, rows };
 }
 
-// Diagnóstico rápido opcional
+// ========== DIAGNÓSTICO ==========
 function debugStatus() {
   const { headers, data, colIndex } = readSheet_();
   const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
   const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd  = getCol_(colIndex, CONFIG.HEADERS.PVD,  CONFIG.FALLBACK_INDEX.PVD);
+  const iPvd = getCol_(colIndex, CONFIG.HEADERS.PVD, CONFIG.FALLBACK_INDEX.PVD);
 
   return {
     sheet: CONFIG.SHEET_NAME,
@@ -148,6 +180,13 @@ function debugStatus() {
     sample_paises: uniqSorted_(data.map(r => r[iPais])).slice(0, 10),
     sample_tipos: uniqSorted_(data.map(r => r[iTipo])).slice(0, 10),
     sample_pvds: uniqSorted_(data.map(r => r[iPvd])).slice(0, 10),
+    cache_enabled: true,
+    cache_duration_seconds: CONFIG.CACHE_DURATION
   };
 }
 
+// ========== UTILIDADES ==========
+function invalidateCache() {
+  clearCache();
+  return { success: true, message: 'Cache limpiado' };
+}

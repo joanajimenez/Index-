@@ -99,7 +99,7 @@ function uniqSorted_(arr) {
   return Array.from(s).sort((a, b) => a.localeCompare(b, 'es'));
 }
 
-// ========== OPCIONES - SOLO PAÍSES AL INICIO ==========
+// ========== OPCIONES - SOLO PAÍSES ==========
 function getOptions() {
   const { data, colIndex } = readSheet_();
 
@@ -110,46 +110,38 @@ function getOptions() {
   return { paises };
 }
 
-// ========== OPCIONES FILTRADAS - TIPOS Y PVD EN CASCADA ==========
-function getOptionsFiltered(filters) {
-  const { data, colIndex } = readSheet_();
+// ========== OBTENER TODOS LOS DATOS ==========
+function getAllData() {
+  const { headers, data, colIndex } = readSheet_();
 
-  const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
-  const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd = getCol_(colIndex, CONFIG.HEADERS.PVD, CONFIG.FALLBACK_INDEX.PVD);
+  let out = data;
 
-  let filtered = data;
-
-  // Filtrar por país
-  if (filters?.pais) {
-    filtered = filtered.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
+  // Limitar resultados para mejor rendimiento
+  if (out.length > CONFIG.MAX_ROWS_DISPLAY) {
+    out = out.slice(0, CONFIG.MAX_ROWS_DISPLAY);
   }
 
-  const tipos = uniqSorted_(filtered.map(r => r[iTipo]));
+  const rows = out.map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = r[i]);
+    return obj;
+  });
 
-  // Filtrar por tipo
-  if (filters?.tipo) {
-    filtered = filtered.filter(r => String(r[iTipo]).trim() === String(filters.tipo).trim());
-  }
-
-  const pvds = uniqSorted_(filtered.map(r => r[iPvd]));
-
-  return { tipos, pvds };
+  return { headers, rows };
 }
 
-// ========== BÚSQUEDA ==========
+// ========== BÚSQUEDA - FILTRAR POR PAÍS ==========
 function search(filters) {
   const { headers, data, colIndex } = readSheet_();
 
   const iPais = getCol_(colIndex, CONFIG.HEADERS.PAIS, CONFIG.FALLBACK_INDEX.PAIS);
-  const iTipo = getCol_(colIndex, CONFIG.HEADERS.TIPO, CONFIG.FALLBACK_INDEX.TIPO);
-  const iPvd = getCol_(colIndex, CONFIG.HEADERS.PVD, CONFIG.FALLBACK_INDEX.PVD);
 
   let out = data;
 
-  if (filters?.pais) out = out.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
-  if (filters?.tipo) out = out.filter(r => String(r[iTipo]).trim() === String(filters.tipo).trim());
-  if (filters?.pvd) out = out.filter(r => String(r[iPvd]).trim() === String(filters.pvd).trim());
+  // Filtrar solo por país
+  if (filters?.pais) {
+    out = out.filter(r => String(r[iPais]).trim() === String(filters.pais).trim());
+  }
 
   // Limitar resultados para mejor rendimiento
   if (out.length > CONFIG.MAX_ROWS_DISPLAY) {

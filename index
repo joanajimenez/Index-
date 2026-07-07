@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<base target="_top">
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Puntos Emisores</title>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+}
+
+:root{
+
+--azul:#0D5CAB;
+
+--azul2:#156FC2;
+
+--gris:#F4F7FB;
+
+--texto:#27313D;
+
+--borde:#D9E3EC;
+
+--card:#FFFFFF;
+
+--radio:14px;
+
+--sombra:
+0 8px 22px rgba(0,0,0,.08);
+
+}
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+body{
+
+font-family:'Inter',sans-serif;
+
+background:#EEF4FB;
+
+color:var(--texto);
+
+padding:24px;
+
+min-height:100vh;
+
+overflow-x:hidden;
+
+position:relative;
+
+}
+
+/*=================================
+
+MAPA DEL MUNDO
+
+==================================*/
+
+body::before{
+
+content:"";
+
+position:fixed;
+
+inset:0;
+
+background-image:url("https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg");
+
+background-repeat:no-repeat;
+
+background-position:center;
+
+background-size:82%;
+
+opacity:.05;
+
+pointer-events:none;
+
+z-index:-1;
+
+}
+
+/*=================================
+
+TITULO
+
+==================================*/
+
+h1{
+
+font-size:34px;
+
+font-weight:800;
+
+text-align:center;
+
+color:#11437A;
+
+margin-bottom:22px;
+
+}
+
+/*=================================
+
+BARRA SUPERIOR
+
+==================================*/
+
+.topbar{
+
+display:flex;
+
+align-items:center;
+
+gap:16px;
+
+background:white;
+
+padding:18px;
+
+border-radius:16px;
+
+box-shadow:var(--sombra);
+
+margin-bottom:24px;
+
+}
+
+#btnResumen{
+
+background:var(--azul);
+
+color:white;
+
+border:none;
+
+padding:12px 22px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-size:14px;
+
+font-weight:700;
+
+transition:.25s;
+
+}
+
+#btnResumen:hover{
+
+background:#08498B;
+
+}
+
+select{
+
+flex:1;
+
+height:46px;
+
+border:1px solid var(--borde);
+
+border-radius:10px;
+
+padding:0 14px;
+
+font-size:14px;
+
+background:white;
+
+outline:none;
+
+transition:.2s;
+
+}
+
+select:focus{
+
+border-color:var(--azul);
+
+box-shadow:0 0 0 3px rgba(13,92,171,.15);
+
+}
+
+#resultado{
+
+margin-top:18px;
+
+}
+
+/*=================================
+
+BUSCADOR
+
+==================================*/
+
+.search{
+
+margin-bottom:16px;
+
+}
+
+.search input{
+
+width:100%;
+
+height:46px;
+
+padding:0 16px;
+
+border-radius:10px;
+
+border:1px solid var(--borde);
+
+font-size:14px;
+
+outline:none;
+
+}
+
+.search input:focus{
+
+border-color:var(--azul);
+
+}
+/*=========================================
+=            TARJETAS PRINCIPALES          =
+=========================================*/
+
+.card{
+
+background:var(--card);
+
+border-radius:14px;
+
+box-shadow:var(--sombra);
+
+margin-bottom:10px;
+
+overflow:hidden;
+
+border:1px solid rgba(0,0,0,.04);
+
+transition:.25s;
+
+}
+
+.card:hover{
+
+transform:translateY(-2px);
+
+box-shadow:0 12px 28px rgba(0,0,0,.10);
+
+}
+
+.cardHeader{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:12px 16px;
+
+cursor:pointer;
+
+background:#fff;
+
+}
+
+.cardInfo{
+
+flex:1;
+
+min-width:0;
+
+}
+
+.cardTitle{
+
+font-size:15px;
+
+font-weight:700;
+
+color:#11437A;
+
+line-height:1.3;
+
+}
+
+.cardSubtitle{
+
+margin-top:4px;
+
+font-size:12px;
+
+color:#6b7280;
+
+}
+
+.cardIcon{
+
+width:34px;
+
+height:34px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+border-radius:50%;
+
+background:#E8F2FC;
+
+color:var(--azul);
+
+font-size:18px;
+
+font-weight:700;
+
+}
+
+.cardBody{
+
+display:none;
+
+padding:14px;
+
+background:#FBFDFF;
+
+border-top:1px solid #E8EEF5;
+
+}
+
+/*=========================================
+=          GRID DE INFORMACIÓN            =
+=========================================*/
+
+.infoGrid{
+
+display:grid;
+
+grid-template-columns:repeat(2,minmax(0,1fr));
+
+gap:10px;
+
+}
+
+.infoItem{
+
+background:#fff;
+
+border:1px solid var(--borde);
+
+border-radius:10px;
+
+padding:8px 10px;
+
+min-height:58px;
+
+}
+
+.infoLabel{
+
+font-size:10px;
+
+font-weight:700;
+
+text-transform:uppercase;
+
+letter-spacing:.3px;
+
+color:#11437A;
+
+margin-bottom:4px;
+
+}
+
+.infoValue{
+
+font-size:12px;
+
+line-height:1.45;
+
+color:#2E3742;
+
+word-break:break-word;
+
+white-space:pre-wrap;
+
+}
+
+/*=========================================
+=             LINKS                       =
+=========================================*/
+
+.infoValue a{
+
+color:var(--azul);
+
+font-weight:600;
+
+text-decoration:none;
+
+}
+
+.infoValue a:hover{
+
+text-decoration:underline;
+
+}
+
+/*=========================================
+=          CONTADOR RESULTADOS            =
+=========================================*/
+
+.resultadoHeader{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:14px;
+
+gap:14px;
+
+flex-wrap:wrap;
+
+}
+
+.resultadoTitulo{
+
+font-size:28px;
+
+font-weight:800;
+
+color:#11437A;
+
+}
+
+.resultadoCantidad{
+
+background:white;
+
+padding:8px 16px;
+
+border-radius:999px;
+
+box-shadow:var(--sombra);
+
+font-size:12px;
+
+font-weight:700;
+
+color:var(--azul);
+
+}
+
+/*=========================================
+=            VISTA RÁPIDA                 =
+=========================================*/
+
+#vistaRapida{
+
+display:none;
+
+background:#fff;
+
+border-radius:16px;
+
+padding:18px;
+
+box-shadow:var(--sombra);
+
+}
+
+#vistaRapida h2{
+
+margin-bottom:16px;
+
+color:#11437A;
+
+font-size:24px;
+
+font-weight:800;
+
+}
+
+.tablaResponsive{
+
+overflow:auto;
+
+border-radius:12px;
+
+border:1px solid var(--borde);
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+font-size:12px;
+
+}
+
+thead{
+
+background:var(--azul);
+
+color:#fff;
+
+}
+
+thead th{
+
+padding:12px;
+
+position:sticky;
+
+top:0;
+
+text-align:left;
+
+white-space:nowrap;
+
+}
+
+tbody td{
+
+padding:10px;
+
+border-bottom:1px solid #E7EDF4;
+
+vertical-align:top;
+
+}
+
+tbody tr:nth-child(even){
+
+background:#F8FBFE;
+
+}
+
+/*=========================================
+=             LOADING                     =
+=========================================*/
+
+.loading{
+
+background:#fff;
+
+padding:26px;
+
+border-radius:16px;
+
+text-align:center;
+
+font-size:15px;
+
+font-weight:600;
+
+box-shadow:var(--sombra);
+
+}
+
+/*=========================================
+=           RESPONSIVE                    =
+=========================================*/
+
+@media(max-width:900px){
+
+.topbar{
+
+flex-direction:column;
+
+align-items:stretch;
+
+}
+
+#btnResumen{
+
+width:100%;
+
+}
+
+.infoGrid{
+
+grid-template-columns:1fr;
+
+}
+
+.resultadoTitulo{
+
+font-size:22px;
+
+}
+
+h1{
+
+font-size:28px;
+
+}
+
+}
+
+</style>
+
+</head><body>
+
+<h1>PUNTOS EMISORES</h1>
+
+<div class="topbar">
+
+<button
+id="btnResumen">
+
+📊 Vista rápida
+
+</button>
+
+<select id="pais">
+
+<option value="">
+
+Seleccione país para visualizar puntos emisores
+
+</option>
+
+</select>
+
+<select id="tipo">
+
+<option value="">
+
+Seleccione tipo
+
+</option>
+
+</select>
+
+<select id="pvd">
+
+<option value="">
+
+Seleccione Punto Emisor
+
+</option>
+
+</select>
+
+</div>
+
+<div class="search">
+
+<input
+
+type="text"
+
+id="txtBuscar"
+
+placeholder="🔎 Buscar dentro de los resultados...">
+
+</div>
+
+<div id="resultado"></div>
+
+<div id="vistaRapida"></div>
+
+<script>
+
+let headers=[];
+
+let rows=[];
+
+let allRows=[];
+
+/*====================================
+
+INICIO
+
+====================================*/
+
+window.onload=()=>{
+
+cargarOpciones();
+
+document
+.getElementById("pais")
+.addEventListener("change",actualizarFiltros);
+
+document
+.getElementById("tipo")
+.addEventListener("change",actualizarFiltros);
+
+document
+.getElementById("pvd")
+.addEventListener("change",buscar);
+
+document
+.getElementById("txtBuscar")
+.addEventListener("keyup",filtrarTarjetas);
+
+document
+.getElementById("btnResumen")
+.addEventListener("click",mostrarVistaRapida);
+
+};
+
+/*====================================
+
+CARGAR OPCIONES
+
+====================================*/
+
+function cargarOpciones(){
+
+google.script.run
+
+.withSuccessHandler(data=>{
+
+llenarSelect(
+
+"pais",
+
+data.paises,
+
+"Seleccione país para visualizar puntos emisores"
+
+);
+
+llenarSelect(
+
+"tipo",
+
+data.tipos,
+
+"Seleccione tipo"
+
+);
+
+llenarSelect(
+
+"pvd",
+
+data.pvds,
+
+"Seleccione Punto Emisor"
+
+);
+
+})
+
+.getOptions();
+
+}
+
+/*====================================
+
+LLENAR SELECT
+
+====================================*/
+
+function llenarSelect(
+
+id,
+
+lista,
+
+texto
+
+){
+
+const select=
+
+document.getElementById(id);
+
+select.innerHTML="";
+
+const opt=
+
+document.createElement("option");
+
+opt.value="";
+
+opt.textContent=texto;
+
+select.appendChild(opt);
+
+lista.forEach(item=>{
+
+const o=
+
+document.createElement("option");
+
+o.value=item;
+
+o.textContent=item;
+
+select.appendChild(o);
+
+});
+
+}
+
+/*====================================
+
+ACTUALIZAR FILTROS
+
+====================================*/
+
+function actualizarFiltros(){
+
+const filtros={
+
+pais:
+
+document.getElementById("pais").value,
+
+tipo:
+
+document.getElementById("tipo").value
+
+};
+
+google.script.run
+
+.withSuccessHandler(data=>{
+
+llenarSelect(
+
+"tipo",
+
+data.tipos,
+
+"Seleccione tipo"
+
+);
+
+llenarSelect(
+
+"pvd",
+
+data.pvds,
+
+"Seleccione Punto Emisor"
+
+);
+
+buscar();
+
+})
+
+.getOptionsFiltered(filtros);
+
+}/*====================================
+
+BUSCAR
+
+====================================*/
+
+function buscar(){
+
+const filtros={
+
+pais:
+document.getElementById("pais").value,
+
+tipo:
+document.getElementById("tipo").value,
+
+pvd:
+document.getElementById("pvd").value
+
+};
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">Cargando información...</div>';
+
+document.getElementById("vistaRapida").style.display="none";
+
+google.script.run
+
+.withSuccessHandler(data=>{
+
+headers=data.headers;
+
+rows=data.rows;
+
+allRows=[...rows];
+
+renderResultados(rows);
+
+})
+
+.search(filtros);
+
+}
+
+/*====================================
+
+VISTA RAPIDA
+
+====================================*/
+
+function mostrarVistaRapida(){
+
+if(rows.length===0){
+
+alert("Primero realiza una búsqueda.");
+
+return;
+
+}
+
+let html=`
+
+<h2>
+
+Vista rápida
+
+</h2>
+
+<div class="tablaResponsive">
+
+<table>
+
+<thead>
+
+<tr>
+
+`;
+
+headers.forEach(h=>{
+
+html+=`<th>${escapeHtml(h)}</th>`;
+
+});
+
+html+=`
+
+</tr>
+
+</thead>
+
+<tbody>
+
+`;
+
+rows.forEach(r=>{
+
+html+="<tr>";
+
+headers.forEach(h=>{
+
+html+=`
+
+<td>
+
+${linkify(r[h]??"")}
+
+</td>
+
+`;
+
+});
+
+html+="</tr>";
+
+});
+
+html+=`
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+document.getElementById("resultado").innerHTML="";
+
+const vr=
+
+document.getElementById("vistaRapida");
+
+vr.innerHTML=html;
+
+vr.style.display="block";
+
+}
+
+/*====================================
+
+RENDER RESULTADOS
+
+====================================*/
+
+function renderResultados(data){
+
+let html=`
+
+<div class="resultadoHeader">
+
+<div class="resultadoTitulo">
+
+Resultados
+
+</div>
+
+<div class="resultadoCantidad">
+
+${data.length} registro(s)
+
+</div>
+
+</div>
+
+`;
+
+data.forEach((fila,index)=>{
+
+html+=renderTarjeta(fila,index);
+
+});
+
+document.getElementById("resultado").innerHTML=html;
+
+}/*====================================
+
+RENDER TARJETA
+
+====================================*/
+
+function renderTarjeta(fila,index){
+
+const titulo=
+
+fila["Nombre en Portal de Venta Directa (PVD)"] ||
+
+fila["PUNTO EMISOR"] ||
+
+"Sin nombre";
+
+const subtitulo=
+
+fila["PUNTO EMISOR"] ||
+
+"";
+
+let html=`
+
+<div
+class="card searchable"
+data-search="${Object.values(fila).join(" ").toLowerCase()}">
+
+<div
+class="cardHeader"
+onclick="toggleCard(${index})">
+
+<div class="cardInfo">
+
+<div class="cardTitle">
+
+${escapeHtml(titulo)}
+
+</div>
+
+<div class="cardSubtitle">
+
+${escapeHtml(subtitulo)}
+
+</div>
+
+</div>
+
+<div
+class="cardIcon"
+id="icon${index}">
+
++
+
+</div>
+
+</div>
+
+<div
+class="cardBody"
+id="body${index}">
+
+<div class="infoGrid">
+
+`;
+
+headers.forEach(campo=>{
+
+const valor=fila[campo];
+
+if(
+
+valor===undefined ||
+
+valor===null ||
+
+String(valor).trim()==""
+
+){
+
+return;
+
+}
+
+html+=`
+
+<div class="infoItem">
+
+<div class="infoLabel">
+
+${escapeHtml(campo)}
+
+</div>
+
+<div class="infoValue">
+
+${linkify(
+
+escapeHtml(valor)
+
+)}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+html+=`
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+return html;
+
+}/*====================================
+
+ABRIR / CERRAR TARJETAS
+
+====================================*/
+
+function toggleCard(index){
+
+const body=document.getElementById("body"+index);
+
+const icon=document.getElementById("icon"+index);
+
+if(body.style.display==="block"){
+
+body.style.display="none";
+
+icon.innerHTML="+";
+
+}else{
+
+body.style.display="block";
+
+icon.innerHTML="−";
+
+}
+
+}
+
+/*====================================
+
+BUSCADOR LOCAL
+
+====================================*/
+
+function filtrarTarjetas(){
+
+const texto=
+
+document
+
+.getElementById("txtBuscar")
+
+.value
+
+.toLowerCase()
+
+.trim();
+
+const tarjetas=
+
+document.querySelectorAll(".searchable");
+
+let visibles=0;
+
+tarjetas.forEach(card=>{
+
+const coincide=
+
+card.dataset.search.includes(texto);
+
+card.style.display=
+
+coincide
+
+?
+
+""
+
+:
+
+"none";
+
+if(coincide){
+
+visibles++;
+
+}
+
+});
+
+const contador=
+
+document.querySelector(".resultadoCantidad");
+
+if(contador){
+
+contador.innerHTML=
+
+visibles+
+
+" registro(s)";
+
+}
+
+}
+
+/*====================================
+
+ESCAPAR HTML
+
+====================================*/
+
+function escapeHtml(valor){
+
+if(
+
+valor===null ||
+
+valor===undefined
+
+){
+
+return "";
+
+}
+
+return String(valor)
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
+
+/*====================================
+
+CONVERTIR LINKS
+
+====================================*/
+
+function linkify(texto){
+
+if(
+
+texto===null ||
+
+texto===undefined
+
+){
+
+return "";
+
+}
+
+const urlRegex=
+
+/(https?:\/\/[^\s]+)/g;
+
+return String(texto)
+
+.replace(
+
+urlRegex,
+
+url=>
+
+`<a href="${url}" target="_blank">${url}</a>`
+
+)
+
+.replace(/\n/g,"<br>");
+
+}/*====================================
+
+LIMPIAR FILTROS
+
+====================================*/
+
+function limpiarFiltros(){
+
+document.getElementById("pais").selectedIndex=0;
+
+document.getElementById("tipo").innerHTML=
+'<option value="">Seleccione tipo</option>';
+
+document.getElementById("pvd").innerHTML=
+'<option value="">Seleccione Punto Emisor</option>';
+
+document.getElementById("txtBuscar").value="";
+
+document.getElementById("resultado").innerHTML="";
+
+document.getElementById("vistaRapida").style.display="none";
+
+cargarOpciones();
+
+}
+
+/*====================================
+
+OCULTAR VISTA RAPIDA
+
+====================================*/
+
+function ocultarVistaRapida(){
+
+document.getElementById("vistaRapida").style.display="none";
+
+}
+
+/*====================================
+
+UTILIDAD
+
+====================================*/
+
+function mostrarLoading(){
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">Consultando información...</div>';
+
+}
+
+/*====================================
+
+INICIALIZACIÓN
+
+====================================*/
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+cargarOpciones();
+
+}
+
+);</script>
+
+</body>
+
+</html>

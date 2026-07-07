@@ -124,7 +124,7 @@ margin-bottom:22px;
 
 /*=================================
 
-BARRA SUPERIOR
+BARRA SUPERIOR - SOLO PAÍS AL INICIO
 
 ==================================*/
 
@@ -136,9 +136,9 @@ align-items:center;
 
 gap:16px;
 
-background:white;
+background:linear-gradient(135deg, #0D5CAB 0%, #156FC2 100%);
 
-padding:18px;
+padding:16px 24px;
 
 border-radius:16px;
 
@@ -150,15 +150,15 @@ margin-bottom:24px;
 
 #btnResumen{
 
-background:var(--azul);
+background:rgba(255,255,255,0.25);
 
 color:white;
 
-border:none;
+border:2px solid white;
 
-padding:12px 22px;
+padding:10px 18px;
 
-border-radius:10px;
+border-radius:8px;
 
 cursor:pointer;
 
@@ -168,11 +168,15 @@ font-weight:700;
 
 transition:.25s;
 
+white-space:nowrap;
+
+flex-shrink:0;
+
 }
 
 #btnResumen:hover{
 
-background:#08498B;
+background:rgba(255,255,255,0.4);
 
 }
 
@@ -180,11 +184,11 @@ select{
 
 flex:1;
 
-height:46px;
+height:44px;
 
-border:1px solid var(--borde);
+border:none;
 
-border-radius:10px;
+border-radius:8px;
 
 padding:0 14px;
 
@@ -196,13 +200,25 @@ outline:none;
 
 transition:.2s;
 
+color:#27313D;
+
 }
 
 select:focus{
 
-border-color:var(--azul);
+box-shadow:0 0 0 3px rgba(255,255,255,.3);
 
-box-shadow:0 0 0 3px rgba(13,92,171,.15);
+}
+
+select:disabled{
+
+background:#f5f5f5;
+
+color:#999;
+
+cursor:not-allowed;
+
+opacity:0.6;
 
 }
 
@@ -221,6 +237,14 @@ BUSCADOR
 .search{
 
 margin-bottom:16px;
+
+display:none;
+
+}
+
+.search.visible{
+
+display:block;
 
 }
 
@@ -246,7 +270,10 @@ outline:none;
 
 border-color:var(--azul);
 
+box-shadow:0 0 0 3px rgba(13,92,171,.15);
+
 }
+
 /*=========================================
 =            TARJETAS PRINCIPALES          =
 =========================================*/
@@ -259,7 +286,7 @@ border-radius:14px;
 
 box-shadow:var(--sombra);
 
-margin-bottom:10px;
+margin-bottom:8px;
 
 overflow:hidden;
 
@@ -285,7 +312,7 @@ justify-content:space-between;
 
 align-items:center;
 
-padding:12px 16px;
+padding:10px 14px;
 
 cursor:pointer;
 
@@ -303,7 +330,7 @@ min-width:0;
 
 .cardTitle{
 
-font-size:15px;
+font-size:13px;
 
 font-weight:700;
 
@@ -311,23 +338,27 @@ color:#11437A;
 
 line-height:1.3;
 
+text-align:left;
+
 }
 
 .cardSubtitle{
 
-margin-top:4px;
+margin-top:2px;
 
-font-size:12px;
+font-size:11px;
 
 color:#6b7280;
+
+text-align:left;
 
 }
 
 .cardIcon{
 
-width:34px;
+width:30px;
 
-height:34px;
+height:30px;
 
 display:flex;
 
@@ -341,9 +372,13 @@ background:#E8F2FC;
 
 color:var(--azul);
 
-font-size:18px;
+font-size:16px;
 
 font-weight:700;
+
+flex-shrink:0;
+
+margin-left:10px;
 
 }
 
@@ -351,7 +386,7 @@ font-weight:700;
 
 display:none;
 
-padding:14px;
+padding:12px 14px;
 
 background:#FBFDFF;
 
@@ -367,9 +402,9 @@ border-top:1px solid #E8EEF5;
 
 display:grid;
 
-grid-template-columns:repeat(2,minmax(0,1fr));
+grid-template-columns:1fr;
 
-gap:10px;
+gap:8px;
 
 }
 
@@ -383,7 +418,7 @@ border-radius:10px;
 
 padding:8px 10px;
 
-min-height:58px;
+min-height:auto;
 
 }
 
@@ -399,7 +434,9 @@ letter-spacing:.3px;
 
 color:#11437A;
 
-margin-bottom:4px;
+margin-bottom:3px;
+
+text-align:left;
 
 }
 
@@ -414,6 +451,8 @@ color:#2E3742;
 word-break:break-word;
 
 white-space:pre-wrap;
+
+text-align:left;
 
 }
 
@@ -465,6 +504,8 @@ font-weight:800;
 
 color:#11437A;
 
+text-align:left;
+
 }
 
 .resultadoCantidad{
@@ -512,6 +553,8 @@ color:#11437A;
 font-size:24px;
 
 font-weight:800;
+
+text-align:left;
 
 }
 
@@ -564,6 +607,10 @@ padding:10px;
 border-bottom:1px solid #E7EDF4;
 
 vertical-align:top;
+
+text-align:left;
+
+white-space:pre-wrap;
 
 }
 
@@ -660,7 +707,7 @@ Seleccione país para visualizar puntos emisores
 
 </select>
 
-<select id="tipo">
+<select id="tipo" style="display:none;">
 
 <option value="">
 
@@ -670,7 +717,7 @@ Seleccione tipo
 
 </select>
 
-<select id="pvd">
+<select id="pvd" style="display:none;">
 
 <option value="">
 
@@ -722,7 +769,7 @@ document
 
 document
 .getElementById("tipo")
-.addEventListener("change",actualizarFiltros);
+.addEventListener("change",actualizarTipo);
 
 document
 .getElementById("pvd")
@@ -740,7 +787,7 @@ document
 
 /*====================================
 
-CARGAR OPCIONES
+CARGAR OPCIONES - SOLO PAÍSES
 
 ====================================*/
 
@@ -760,25 +807,11 @@ data.paises,
 
 );
 
-llenarSelect(
+})
 
-"tipo",
+.withFailureHandler(error=>{
 
-data.tipos,
-
-"Seleccione tipo"
-
-);
-
-llenarSelect(
-
-"pvd",
-
-data.pvds,
-
-"Seleccione Punto Emisor"
-
-);
+console.error('Error al cargar países:',error);
 
 })
 
@@ -836,23 +869,32 @@ select.appendChild(o);
 
 /*====================================
 
-ACTUALIZAR FILTROS
+ACTUALIZAR FILTROS - PAÍS SELECCIONADO
 
 ====================================*/
 
 function actualizarFiltros(){
 
-const filtros={
+const pais = document.getElementById("pais").value;
 
-pais:
+if(!pais){
 
-document.getElementById("pais").value,
+document.getElementById("tipo").style.display="none";
 
-tipo:
+document.getElementById("pvd").style.display="none";
 
-document.getElementById("tipo").value
+document.getElementById("resultado").innerHTML="";
 
-};
+document.querySelector(".search").classList.remove("visible");
+
+return;
+
+}
+
+// Mostrar Tipo cuando se selecciona País
+document.getElementById("tipo").style.display="block";
+
+const filtros={ pais };
 
 google.script.run
 
@@ -868,6 +910,57 @@ data.tipos,
 
 );
 
+document.getElementById("pvd").style.display="none";
+
+document.getElementById("resultado").innerHTML="";
+
+document.querySelector(".search").classList.remove("visible");
+
+})
+
+.withFailureHandler(error=>{
+
+console.error('Error al cargar tipos:',error);
+
+})
+
+.getOptionsFiltered(filtros);
+
+}
+
+/*====================================
+
+ACTUALIZAR TIPO - TIPO SELECCIONADO
+
+====================================*/
+
+function actualizarTipo(){
+
+const pais = document.getElementById("pais").value;
+
+const tipo = document.getElementById("tipo").value;
+
+if(!pais || !tipo){
+
+document.getElementById("pvd").style.display="none";
+
+document.getElementById("resultado").innerHTML="";
+
+document.querySelector(".search").classList.remove("visible");
+
+return;
+
+}
+
+// Mostrar PVD cuando se selecciona Tipo
+document.getElementById("pvd").style.display="block";
+
+const filtros={ pais, tipo };
+
+google.script.run
+
+.withSuccessHandler(data=>{
+
 llenarSelect(
 
 "pvd",
@@ -878,13 +971,23 @@ data.pvds,
 
 );
 
-buscar();
+document.getElementById("resultado").innerHTML="";
+
+document.querySelector(".search").classList.remove("visible");
+
+})
+
+.withFailureHandler(error=>{
+
+console.error('Error al cargar PVD:',error);
 
 })
 
 .getOptionsFiltered(filtros);
 
-}/*====================================
+}
+
+/*====================================
 
 BUSCAR
 
@@ -892,22 +995,37 @@ BUSCAR
 
 function buscar(){
 
-const filtros={
+const pais = document.getElementById("pais").value;
 
-pais:
-document.getElementById("pais").value,
+const tipo = document.getElementById("tipo").value;
 
-tipo:
-document.getElementById("tipo").value,
+const pvd = document.getElementById("pvd").value;
 
-pvd:
-document.getElementById("pvd").value
-
-};
+if(!pais){
 
 document.getElementById("resultado").innerHTML=
 
-'<div class="loading">Cargando información...</div>';
+'<div class="loading">Por favor, selecciona un país</div>';
+
+return;
+
+}
+
+if(!tipo){
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">Por favor, selecciona un tipo</div>';
+
+return;
+
+}
+
+const filtros={ pais, tipo, pvd };
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">⏳ Cargando información...</div>';
 
 document.getElementById("vistaRapida").style.display="none";
 
@@ -921,7 +1039,31 @@ rows=data.rows;
 
 allRows=[...rows];
 
+if(rows.length===0){
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">❌ No se encontraron resultados</div>';
+
+document.querySelector(".search").classList.remove("visible");
+
+}else{
+
 renderResultados(rows);
+
+document.querySelector(".search").classList.add("visible");
+
+}
+
+})
+
+.withFailureHandler(error=>{
+
+document.getElementById("resultado").innerHTML=
+
+'<div class="loading">❌ Error: '+error+'</div>';
+
+console.error('Error en búsqueda:',error);
 
 })
 
@@ -931,7 +1073,117 @@ renderResultados(rows);
 
 /*====================================
 
-VISTA RAPIDA
+RENDERIZAR RESULTADOS
+
+====================================*/
+
+function renderResultados(rowsToRender){
+
+const resultado = document.getElementById("resultado");
+
+resultado.innerHTML="";
+
+const headerDiv = document.createElement("div");
+
+headerDiv.className="resultadoHeader";
+
+headerDiv.innerHTML=`
+
+<div class="resultadoTitulo">Resultados</div>
+
+<div class="resultadoCantidad">${rowsToRender.length} encontrados</div>
+
+`;
+
+resultado.appendChild(headerDiv);
+
+rowsToRender.forEach((row,idx)=>{
+
+const card=document.createElement("div");
+
+card.className="card";
+
+let titulo="";
+
+let subtitulo="";
+
+if(headers.length>0){
+
+titulo=row[headers[0]]||"";
+
+if(headers.length>1){
+
+subtitulo=row[headers[1]]||"";
+
+}
+
+}
+
+card.innerHTML=`
+
+<div class="cardHeader" onclick="toggleCard(this)">
+
+<div class="cardInfo">
+
+<div class="cardTitle">${escapeHtml(String(titulo))}</div>
+
+<div class="cardSubtitle">${escapeHtml(String(subtitulo))}</div>
+
+</div>
+
+<div class="cardIcon">▼</div>
+
+</div>
+
+<div class="cardBody">
+
+<div class="infoGrid">
+
+${headers.map(h=>`
+
+<div class="infoItem">
+
+<div class="infoLabel">${escapeHtml(h)}</div>
+
+<div class="infoValue">${linkify(row[h]??"")}</div>
+
+</div>
+
+`).join("")}
+
+</div>
+
+</div>
+
+`;
+
+resultado.appendChild(card);
+
+});
+
+}
+
+function toggleCard(header){
+
+const body=header.nextElementSibling;
+
+if(body.style.display==="block"){
+
+body.style.display="none";
+
+}else{
+
+document.querySelectorAll(".cardBody").forEach(b=>b.style.display="none");
+
+body.style.display="block";
+
+}
+
+}
+
+/*====================================
+
+VISTA RÁPIDA
 
 ====================================*/
 
@@ -947,11 +1199,7 @@ return;
 
 let html=`
 
-<h2>
-
-Vista rápida
-
-</h2>
+<h2>Vista rápida</h2>
 
 <div class="tablaResponsive">
 
@@ -1011,267 +1259,51 @@ html+=`
 
 `;
 
-document.getElementById("resultado").innerHTML="";
+const vistaRapida=document.getElementById("vistaRapida");
 
-const vr=
+vistaRapida.innerHTML=html;
 
-document.getElementById("vistaRapida");
-
-vr.innerHTML=html;
-
-vr.style.display="block";
+vistaRapida.style.display="block";
 
 }
 
 /*====================================
 
-RENDER RESULTADOS
-
-====================================*/
-
-function renderResultados(data){
-
-let html=`
-
-<div class="resultadoHeader">
-
-<div class="resultadoTitulo">
-
-Resultados
-
-</div>
-
-<div class="resultadoCantidad">
-
-${data.length} registro(s)
-
-</div>
-
-</div>
-
-`;
-
-data.forEach((fila,index)=>{
-
-html+=renderTarjeta(fila,index);
-
-});
-
-document.getElementById("resultado").innerHTML=html;
-
-}/*====================================
-
-RENDER TARJETA
-
-====================================*/
-
-function renderTarjeta(fila,index){
-
-const titulo=
-
-fila["Nombre en Portal de Venta Directa (PVD)"] ||
-
-fila["PUNTO EMISOR"] ||
-
-"Sin nombre";
-
-const subtitulo=
-
-fila["PUNTO EMISOR"] ||
-
-"";
-
-let html=`
-
-<div
-class="card searchable"
-data-search="${Object.values(fila).join(" ").toLowerCase()}">
-
-<div
-class="cardHeader"
-onclick="toggleCard(${index})">
-
-<div class="cardInfo">
-
-<div class="cardTitle">
-
-${escapeHtml(titulo)}
-
-</div>
-
-<div class="cardSubtitle">
-
-${escapeHtml(subtitulo)}
-
-</div>
-
-</div>
-
-<div
-class="cardIcon"
-id="icon${index}">
-
-+
-
-</div>
-
-</div>
-
-<div
-class="cardBody"
-id="body${index}">
-
-<div class="infoGrid">
-
-`;
-
-headers.forEach(campo=>{
-
-const valor=fila[campo];
-
-if(
-
-valor===undefined ||
-
-valor===null ||
-
-String(valor).trim()==""
-
-){
-
-return;
-
-}
-
-html+=`
-
-<div class="infoItem">
-
-<div class="infoLabel">
-
-${escapeHtml(campo)}
-
-</div>
-
-<div class="infoValue">
-
-${linkify(
-
-escapeHtml(valor)
-
-)}
-
-</div>
-
-</div>
-
-`;
-
-});
-
-html+=`
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-return html;
-
-}/*====================================
-
-ABRIR / CERRAR TARJETAS
-
-====================================*/
-
-function toggleCard(index){
-
-const body=document.getElementById("body"+index);
-
-const icon=document.getElementById("icon"+index);
-
-if(body.style.display==="block"){
-
-body.style.display="none";
-
-icon.innerHTML="+";
-
-}else{
-
-body.style.display="block";
-
-icon.innerHTML="−";
-
-}
-
-}
-
-/*====================================
-
-BUSCADOR LOCAL
+FILTRAR TARJETAS
 
 ====================================*/
 
 function filtrarTarjetas(){
 
-const texto=
+const txt=document.getElementById("txtBuscar").value.toLowerCase();
 
-document
+const tarjetas=document.querySelectorAll(".card");
 
-.getElementById("txtBuscar")
+let visible=0;
 
-.value
+tarjetas.forEach(tarjeta=>{
 
-.toLowerCase()
+const contenido=tarjeta.textContent.toLowerCase();
 
-.trim();
+if(contenido.includes(txt)){
 
-const tarjetas=
+tarjeta.style.display="";
 
-document.querySelectorAll(".searchable");
+visible++;
 
-let visibles=0;
+}else{
 
-tarjetas.forEach(card=>{
-
-const coincide=
-
-card.dataset.search.includes(texto);
-
-card.style.display=
-
-coincide
-
-?
-
-""
-
-:
-
-"none";
-
-if(coincide){
-
-visibles++;
+tarjeta.style.display="none";
 
 }
 
 });
 
-const contador=
-
-document.querySelector(".resultadoCantidad");
+const contador=document.querySelector(".resultadoCantidad");
 
 if(contador){
 
-contador.innerHTML=
-
-visibles+
-
-" registro(s)";
+contador.textContent=visible+" resultados";
 
 }
 
@@ -1279,145 +1311,31 @@ visibles+
 
 /*====================================
 
-ESCAPAR HTML
+UTILIDADES
 
 ====================================*/
 
-function escapeHtml(valor){
+function escapeHtml(text){
 
-if(
+const div=document.createElement("div");
 
-valor===null ||
+div.textContent=text;
 
-valor===undefined
-
-){
-
-return "";
+return div.innerHTML;
 
 }
 
-return String(valor)
+function linkify(text){
 
-.replace(/&/g,"&amp;")
+const str=String(text??"");
 
-.replace(/</g,"&lt;")
+const urlRegex=/(https?:\/\/[^\s]+)/g;
 
-.replace(/>/g,"&gt;")
-
-.replace(/"/g,"&quot;")
-
-.replace(/'/g,"&#039;");
+return str.replace(urlRegex,'<a href="$1" target="_blank">🔗 Abrir</a>');
 
 }
 
-/*====================================
-
-CONVERTIR LINKS
-
-====================================*/
-
-function linkify(texto){
-
-if(
-
-texto===null ||
-
-texto===undefined
-
-){
-
-return "";
-
-}
-
-const urlRegex=
-
-/(https?:\/\/[^\s]+)/g;
-
-return String(texto)
-
-.replace(
-
-urlRegex,
-
-url=>
-
-`<a href="${url}" target="_blank">${url}</a>`
-
-)
-
-.replace(/\n/g,"<br>");
-
-}/*====================================
-
-LIMPIAR FILTROS
-
-====================================*/
-
-function limpiarFiltros(){
-
-document.getElementById("pais").selectedIndex=0;
-
-document.getElementById("tipo").innerHTML=
-'<option value="">Seleccione tipo</option>';
-
-document.getElementById("pvd").innerHTML=
-'<option value="">Seleccione Punto Emisor</option>';
-
-document.getElementById("txtBuscar").value="";
-
-document.getElementById("resultado").innerHTML="";
-
-document.getElementById("vistaRapida").style.display="none";
-
-cargarOpciones();
-
-}
-
-/*====================================
-
-OCULTAR VISTA RAPIDA
-
-====================================*/
-
-function ocultarVistaRapida(){
-
-document.getElementById("vistaRapida").style.display="none";
-
-}
-
-/*====================================
-
-UTILIDAD
-
-====================================*/
-
-function mostrarLoading(){
-
-document.getElementById("resultado").innerHTML=
-
-'<div class="loading">Consultando información...</div>';
-
-}
-
-/*====================================
-
-INICIALIZACIÓN
-
-====================================*/
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-cargarOpciones();
-
-}
-
-);</script>
+</script>
 
 </body>
 

@@ -217,7 +217,7 @@ margin-top:18px;
 }
 
 /*=========================================
-=            TARJETAS (TARJETAS MODE)      =
+=            TARJETAS                      =
 =========================================*/
 
 .card{
@@ -417,7 +417,7 @@ text-decoration:underline;
 }
 
 /*=========================================
-=            TABLA RESULTADOS             =
+=            TABLA                        =
 =========================================*/
 
 .tablaResponsive{
@@ -592,14 +592,14 @@ window.onload=()=>{
 
 cargarOpciones();
 
-document.getElementById("btnResumen").addEventListener("click", mostrarVistaRapidaTodos);
+document.getElementById("btnResumen").addEventListener("click", vistaRapida);
 
-document.getElementById("pais").addEventListener("change", buscarPorPais);
+document.getElementById("pais").addEventListener("change", filtrarPorPais);
 
 };
 
 /*====================================
-CARGAR OPCIONES - SOLO PAÍSES
+CARGAR PAÍSES
 ====================================*/
 
 function cargarOpciones(){
@@ -608,13 +608,27 @@ google.script.run
 
 .withSuccessHandler(data=>{
 
-llenarSelect("pais", data.paises, "Seleccione país para visualizar puntos emisores");
+const select = document.getElementById("pais");
+
+select.innerHTML = '<option value="">Seleccione país para visualizar puntos emisores</option>';
+
+data.paises.forEach(pais=>{
+
+const opt = document.createElement("option");
+
+opt.value = pais;
+
+opt.textContent = pais;
+
+select.appendChild(opt);
+
+});
 
 })
 
 .withFailureHandler(error=>{
 
-console.error('Error al cargar países:', error);
+console.error('Error:', error);
 
 alert('Error al cargar países: ' + error);
 
@@ -625,44 +639,12 @@ alert('Error al cargar países: ' + error);
 }
 
 /*====================================
-LLENAR SELECT
+VISTA RÁPIDA - TODOS LOS DATOS (TABLA)
 ====================================*/
 
-function llenarSelect(id, lista, texto){
+function vistaRapida(){
 
-const select = document.getElementById(id);
-
-select.innerHTML = "";
-
-const opt = document.createElement("option");
-
-opt.value = "";
-
-opt.textContent = texto;
-
-select.appendChild(opt);
-
-lista.forEach(item=>{
-
-const o = document.createElement("option");
-
-o.value = item;
-
-o.textContent = item;
-
-select.appendChild(o);
-
-});
-
-}
-
-/*====================================
-VISTA RÁPIDA - TODOS LOS PAÍSES (TABLA)
-====================================*/
-
-function mostrarVistaRapidaTodos(){
-
-document.getElementById("resultado").innerHTML = '<div class="loading">⏳ Cargando todos los puntos emisores...</div>';
+document.getElementById("resultado").innerHTML = '<div class="loading">⏳ Cargando...</div>';
 
 google.script.run
 
@@ -672,15 +654,7 @@ headers = data.headers;
 
 rows = data.rows;
 
-if(rows.length===0){
-
-document.getElementById("resultado").innerHTML = '<div class="loading">❌ No hay datos disponibles</div>';
-
-}else{
-
-mostrarTabla(rows, headers, "Vista rápida de Puntos Emisores");
-
-}
+renderTable(rows, headers, "Vista rápida de Puntos Emisores");
 
 })
 
@@ -697,10 +671,10 @@ console.error('Error:', error);
 }
 
 /*====================================
-BUSCAR POR PAÍS (TARJETAS)
+FILTRAR POR PAÍS - TARJETAS
 ====================================*/
 
-function buscarPorPais(){
+function filtrarPorPais(){
 
 const pais = document.getElementById("pais").value;
 
@@ -712,9 +686,7 @@ return;
 
 }
 
-const filtros = { pais };
-
-document.getElementById("resultado").innerHTML = '<div class="loading">⏳ Cargando información...</div>';
+document.getElementById("resultado").innerHTML = '<div class="loading">⏳ Cargando...</div>';
 
 google.script.run
 
@@ -724,15 +696,7 @@ headers = data.headers;
 
 rows = data.rows;
 
-if(rows.length===0){
-
-document.getElementById("resultado").innerHTML = '<div class="loading">❌ No se encontraron resultados</div>';
-
-}else{
-
-mostrarTarjetas(rows, headers);
-
-}
+renderCards(rows, headers);
 
 })
 
@@ -740,19 +704,19 @@ mostrarTarjetas(rows, headers);
 
 document.getElementById("resultado").innerHTML = '<div class="loading">❌ Error: '+error+'</div>';
 
-console.error('Error en búsqueda:', error);
+console.error('Error:', error);
 
 })
 
-.search(filtros);
+.search({ pais });
 
 }
 
 /*====================================
-MOSTRAR TABLA (VISTA RÁPIDA)
+RENDERIZAR TABLA
 ====================================*/
 
-function mostrarTabla(rowsToShow, allHeaders, titulo){
+function renderTable(rowsToShow, allHeaders, titulo){
 
 const headersToShow = allHeaders.filter(h => 
 
@@ -791,18 +755,18 @@ document.getElementById("resultado").innerHTML = html;
 }
 
 /*====================================
-MOSTRAR TARJETAS (POR PAÍS)
+RENDERIZAR TARJETAS
 ====================================*/
 
-function mostrarTarjetas(rowsToShow, allHeaders){
+function renderCards(rowsToShow, allHeaders){
 
 let html = "";
 
 rowsToShow.forEach((row, idx)=>{
 
-let titulo = row['Nombre en Portal de Venta Directa (PVD)'] || row[allHeaders[0]] || "";
+const titulo = row['Nombre en Portal de Venta Directa (PVD)'] || row['PUNTO EMISOR'] || "Sin nombre";
 
-let subtitulo = row['PUNTO EMISOR'] || "";
+const subtitulo = row['PUNTO EMISOR'] || "";
 
 html += `
 
@@ -848,19 +812,11 @@ html += `
 
 });
 
-html += `
-
-</div>
-
-</div>
-
-</div>
-
-`;
+html += `</div></div></div>`;
 
 });
 
-document.getElementById("resultado").innerHTML = html;
+document.getElementById("resultado").innerHTML = html || '<div class="loading">❌ Sin resultados</div>';
 
 }
 
